@@ -103,7 +103,7 @@ class PC:
         values = np.empty((l, E-1))
         symbol = np.zeros(values.shape)
         for i in range(1, E):
-            values[:, i-1] = mx[:, i] - mx[:, i-1]
+            values[:, i-1] = (mx[:, i] - mx[:, i-1]) / mx[:, i-1]
 
         symbol[values < 0] = -1
         symbol[values > 0] = 1
@@ -149,7 +149,8 @@ class PC:
             nn_ind = np.full((nn_dist.shape[0], no), -1, dtype=np.int_)
 
             for i in range(start, end):
-                line = dist[i, :i]
+                # line = dist[i, :i]
+                line = dist[i]
                 nn_dist[i] = np.sort(line)[:no]
                 nn_ind[i] = np.argsort(line)[:no]
 
@@ -158,8 +159,12 @@ class PC:
         h = self.h
         nn_ind = (nn_ind + h)[start: nn_ind.shape[0]-h]
         nn_ind = np.vstack([np.full((h + start, no), -1), nn_ind])
+
+        nn_dist[start+h:] = dist[np.arange(start+h, end)[:, None], nn_ind]
+        '''
         for i in range(start+h, end):
             nn_dist[i] = dist[i, nn_ind[i]]
+        '''
 
         return nn_dist, nn_ind
 
